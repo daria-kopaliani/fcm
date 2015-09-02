@@ -13,8 +13,6 @@ plot(data$x, data$y)
 
 
 fcm <- fcm.batch.run(data, 3)
-
-source("fcm-visualizer.R")
 visualize(fcm, data)
 
 fcm1 <- fcm.online.run(data, 3)
