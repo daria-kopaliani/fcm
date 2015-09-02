@@ -1,27 +1,39 @@
 source("fcm.R")
 source("fcm-visualizer.R")
 
-m0 <- cbind(runif(17, 0, 5), runif(17, 0, 3))
-m1 <- cbind(runif(17, 10, 12), runif(17, 8, 11))
-m2 <- cbind(runif(15, 4, 8), runif(15, 5, 8))
-m3 <- cbind(runif(15, 0, 4), runif(15, 5, 10))
+m0 <- cbind(runif(27, 0, 5), runif(27, 0, 3))
+m1 <- cbind(runif(27, 10, 12), runif(27, 8, 11))
+m2 <- cbind(runif(25, 4, 8), runif(25, 5, 8))
+m3 <- cbind(runif(25, 0, 4), runif(25, 5, 10))
 matrix <- rbind(m0, m1, m2, m3)
 data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
 colnames(data) <- c("x", "y")
 data <- data[sample(nrow(data)),]
 plot(data$x, data$y)
 
+#####
 fcm <- fcm.batch.run(data, 3)
-visualize(fcm, data)
+visualize.clusters(fcm, data)
 
+#####
 fcm1 <- fcm.online.run(data, 3)
-visualize(fcm1, data)
+visualize.clusters(fcm1, data)
 
+#####
 fcm2_0 <- fcm.batch.run(data[1:20,], 3)
 fcm2 <- fcm.online.run(data, 3, centers = fcm2_0$centers)
-visualize(fcm2, data)
+visualize.clusters(fcm2, data)
 
+#####
+fcm3_0 <- fcm.batch.run(data[1:20,], 4)
+fcm3 <- fcm.online.run(data, 4, centers = fcm3_0$centers)
+visualize.clusters(fcm3, data)
+
+#####
+centers <- fcm.batch.run(data[1:20, ], 4)$centers
 for (k in 1 : nrow(data)) {
-  fcm <- fcm.online.run(data[k, ], 3, centers = fcm$centers)
-  visualize(fcm, data[1:k, ])
+  fcm <- fcm.online.run(data[k, ], 4, centers = centers)
+  visualize.clusters(fcm, data[1:k, ])
+  centers <- fcm$centers
+  readline(prompt="Press [enter] to continue")
 }
