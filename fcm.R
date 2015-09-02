@@ -76,13 +76,7 @@ fcm.online.run <- function(data, nclusters, m = 2, ee = 0.01, centers = NULL) {
   fcm
 }
 
-# fcm.online.run.visualize <- function(data, nclusters, m = 2, ee = 0.01, centers = NULL) {
-#   
-#   fcm <- fcm.online.run(data, nclusters, m, ee, FALSE, centers)
-#   visualize(fcm, data)
-# }
-
-fcm.batch.run <- function(data, nclusters, m = 2, centers = NULL, ee = 0.01) {
+fcm.batch.run <- function(data, nclusters, fuzzifier = 2, centers = NULL, ee = 0.01) {
   
   if (is.null(centers)) {
     centers <- cbind(runif(nclusters, 0, 1), runif(nclusters, 0, 1))  
@@ -91,26 +85,10 @@ fcm.batch.run <- function(data, nclusters, m = 2, centers = NULL, ee = 0.01) {
   
   for (k in 1 : 100) {
     prevU <- U
-    for (i in 1 : nrow(data)) {
-      for (j in 1 : nclusters) {
-        z <- 0
-        for (k in 1 : nclusters) {
-          z <- z + (vector.norm(data[i, ] - centers[j, ]) / vector.norm(data[i, ] - centers[k, ])) ^ (m - 1)  
-        }
-        U[i, j] <- (1 / z)      
-      }
-    }
-    
+    U <- fcm.membership.values(data, centers, fuzzifier)    
     for (j in 1 : nclusters) {
-      temp <- numeric(ncol(centers))
-      temp1 <- 0
-      for (i in 1 : nrow(data)) {
-        temp <- temp + ((U[i, j]) ^ m) * data[i,]
-        temp1 <- temp1 + (U[i, j]) ^ m
-      }
-      centers[j,] <- as.numeric(temp / temp1)
+      centers[j,] <- apply((U[,j] ^ fuzzifier) * data, 2, sum) / sum(U[,j] ^ fuzzifier)
     }
-  
     if (max(abs(prevU - U)) < ee)  {
       break
     }
