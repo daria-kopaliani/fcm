@@ -40,20 +40,20 @@ fcm.XB <- function(fcm, data) {
   NXB/DXB
 }
 
-fcm.membership.values <- function(data0, centers, fuzzifier) {
+fcm.membership.values <- function(data, centers, fuzzifier) {
   
-  u <- matrix(0, nrow = nrow(data0), ncol = nrow(centers))
-  for (i in 1 : nrow(data0)) {
+  sample <- as.matrix(data)
+  u <- matrix(0, nrow = nrow(sample), ncol = nrow(centers))
+  for (i in 1 : nrow(sample)) {
     for (j in 1 : nrow(centers)) {
-      u[i, j] <- vector.norm(data0[i,] - centers[j,])^(2 / (1 - fuzzifier))
+      u[i, j] <- vector.norm(sample[i,] - centers[j,])^(2 / (1 - fuzzifier))
       z <- 0
       for (k in 1 : nrow(centers)) {
-        z <- z + vector.norm(data0[i,] - centers[k,])^(2 / (1 - fuzzifier))
+        z <- z + vector.norm(sample[i,] - centers[k,])^(2 / (1 - fuzzifier))
       }
       u[i, j] <- u[i, j] / z
     }
   }
-  
   u
 }
 
@@ -64,15 +64,15 @@ fcm.online.run <- function(data, nclusters, m = 2, ee = 0.01, centers = NULL) {
   } 
   fcm <- list(centers = centers, fuzzifier = m, U = matrix(0, nrow = nrow(data), ncol = nclusters))  
   for (i in 1 : nrow(data)) {
+    sample <- as.matrix(data[i,])
     ss <- 0.6 * exp(-(i/nrow(data)))
-    u <- fcm.membership.values(data[i,], fcm$centers, m)  
-    for (j in 1 : nclusters) {
-      fcm$centers[j,] <- as.numeric(fcm$centers[j,] + ss * (u[j] ^ m) * (data[i,] - fcm$centers))
+    u <- fcm.membership.values(sample, fcm$centers, m)
+    for (j in 1 : nclusters)  {
+      fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ m) * (sample - fcm$centers[j,])
     }
-    
   }
-  fcm$U <- fcm.membership.values(data, centers, m)
-  
+  fcm$U <- fcm.membership.values(data, fcm$centers, m)  
+
   fcm
 }
 
