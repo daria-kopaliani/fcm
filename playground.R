@@ -11,12 +11,15 @@ colnames(data) <- c("x", "y")
 data <- data[sample(nrow(data)),]
 plot(data$x, data$y)
 
-
 fcm <- fcm.batch.run(data, 3)
 visualize(fcm, data)
 
 fcm1 <- fcm.online.run(data, 3)
 visualize(fcm1, data)
+
+fcm2_0 <- fcm.batch.run(data[1:20,], 3)
+fcm2 <- fcm.online.run(data, 3, centers = fcm2_0$centers)
+visualize(fcm2, data)
 
 for (k in 1 : nrow(data)) {
   fcm <- fcm.online.run(data[k, ], 3, centers = fcm$centers)
