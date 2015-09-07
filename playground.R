@@ -50,28 +50,33 @@ irisData <- apply(irisData, 2, function(x){(x-min(x))/(max(x)-min(x))})
 order <- sample(nrow(irisData))
 irisData <- irisData[order,]
 
-fcm4 <- fcm.batch.run(irisData, 3, 4)
+fcm4 <- fcm.batch.run(irisData, 3, 5)
 clusters <- fcm.cluster(fcm4, irisData)
 clustering.accuracy(clusters, iris[order, 5])
 
+fcm5 <- fcm.batch.run(irisData, 4, 4)
+clusters <- fcm.cluster(fcm5, irisData)
+clustering.accuracy1(clusters, iris[order, 5])
+
 clustering.accuracy <- function(clusters, labels) {
- 
+  
   accuracy <- 0
   
-  for (label in levels(labels)) {
-    cc <- factor(clusters[(labels == label)])
+  clusters_data <- factor(clusters)
+  for (cluster in levels(clusters_data)) {
+    cc <- labels[(clusters == cluster)]
     max_occur <- 0
     class <- levels(cc)[1]
-    for (aLabel in levels(cc)) {
-     if (sum(cc == aLabel) > max_occur) {
-       max_occur = sum(cc == aLabel)
-       class <- aLabel
-     }
+    for (label in levels(cc)) {
+      if (sum(cc == label) > max_occur) {
+        max_occur <- sum(cc == label)
+        class <- label
+      }
     }
-    
-    accuracy <- accuracy + (sum(cc == class) / length(cc)) / length(levels(labels))
+    accuracy <- accuracy + (sum(cc == class) / length(cc)) / length(levels(clusters_data))
   }
   
   accuracy
 }
+
 
