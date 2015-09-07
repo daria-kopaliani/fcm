@@ -60,7 +60,7 @@ fcm.membership.values <- function(data, centers, fuzzifier) {
 fcm.online.run <- function(data, nclusters, fuzzifier = 2, centers = NULL) {
   
   if (is.null(centers)) {
-    centers <- cbind(runif(nclusters, 0, 1), runif(nclusters, 0, 1))  
+    centers <- matrix(runif(ncol(data) * nclusters, 0, 1), ncol = ncol(data), nrow = nclusters)
   } 
   fcm <- list(centers = centers, fuzzifier = fuzzifier, membership.values = NULL)  
   for (i in 1 : nrow(data)) {
@@ -78,7 +78,7 @@ fcm.online.run <- function(data, nclusters, fuzzifier = 2, centers = NULL) {
 
 fcm.batch.run <- function(data, nclusters, fuzzifier = 2, e = 0.01, max.epoch = 100) {
   
-  centers <- cbind(runif(nclusters, 0, 1), runif(nclusters, 0, 1))  
+  centers <- matrix(runif(ncol(data) * nclusters, 0, 1), ncol = ncol(data), nrow = nclusters)
   membership.values <- matrix(0, nrow = nrow(data), ncol = nclusters)
   for (k in 1 : max.epoch) {
     prev.membership.values <- membership.values
@@ -92,4 +92,14 @@ fcm.batch.run <- function(data, nclusters, fuzzifier = 2, e = 0.01, max.epoch = 
   }
   
   list(centers = centers, fuzzifier = fuzzifier, membership.values = membership.values)
+}
+
+fcm.cluster <- function(fcm, sample) {
+  
+  data <- as.matrix(sample)
+  if (nrow(sample) == 1) {
+    data <- t(data)
+  } 
+  membership.values <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier) 
+  as.matrix(apply(membership.values, 1, which.max))
 }

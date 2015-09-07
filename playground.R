@@ -12,7 +12,7 @@ data <- data[sample(nrow(data)),]
 plot(data$x, data$y)
 
 #####
-fcm <- fcm.batch.run(data, 3)
+fcm <- fcm.batch.run(data, 4, 5)
 visualize.clusters(fcm, data)
 
 #####
@@ -26,8 +26,14 @@ visualize.clusters(fcm2, data)
 
 #####
 fcm3_0 <- fcm.batch.run(data[1:20,], 4)
-fcm3 <- fcm.online.run(data, 4, centers = fcm3_0$centers)
+fcm3 <- fcm.online.run(data, 4, centers = fcm3_0$centers, fuzzifier = 3)
 visualize.clusters(fcm3, data)
+
+
+fcm3 <- fcm.online.run(data, 4, centers = fcm3_0$centers, fuzzifier = 3)
+visualize.clusters(fcm3, data)
+
+visualize.lattice(fcm3)
 
 #####
 centers <- fcm.batch.run(data[1:20, ], 4)$centers
@@ -37,3 +43,35 @@ for (k in 1 : nrow(data)) {
   centers <- fcm$centers
   readline(prompt="Press [enter] to continue")
 }
+
+#####
+irisData <- iris[, 1:4]
+irisData <- apply(irisData, 2, function(x){(x-min(x))/(max(x)-min(x))})
+order <- sample(nrow(irisData))
+irisData <- irisData[order,]
+
+fcm4 <- fcm.batch.run(irisData, 3, 4)
+clusters <- fcm.cluster(fcm4, irisData)
+clustering.accuracy(clusters, iris[order, 5])
+
+clustering.accuracy <- function(clusters, labels) {
+ 
+  accuracy <- 0
+  
+  for (label in levels(labels)) {
+    cc <- factor(clusters[(labels == label)])
+    max_occur <- 0
+    class <- levels(cc)[1]
+    for (aLabel in levels(cc)) {
+     if (sum(cc == aLabel) > max_occur) {
+       max_occur = sum(cc == aLabel)
+       class <- aLabel
+     }
+    }
+    
+    accuracy <- accuracy + (sum(cc == class) / length(cc)) / length(levels(labels))
+  }
+  
+  accuracy
+}
+
