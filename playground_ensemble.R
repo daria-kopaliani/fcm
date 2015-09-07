@@ -23,32 +23,3 @@ for (i in 1 : nrow(data)) {
   par(old.par)
   readline(prompt="Press [enter] to continue")
 }
-
-
-
-
-initial_centers <- fcm.batch.run(data[1:20, ], 2, 2)$centers
-ensemble <- NULL
-for (i in 1 : nrow(data)) {
-  if (is.null(ensemble)) {
-    ensemble <- fcm.ensemble.online.run(ensemble, data[i,], n_clusters, initial_centers = initial_centers) 
-  } else {
-    ensemble <- fcm.ensemble.online.run(ensemble, data[i,], n_clusters)
-  }
-  
-  old.par <- par(mfrow=c(1, 3))
-  visualize.progress(ensemble$fcms[[1]], data[1:i,])
-  visualize.progress(ensemble$fcms[[2]], data[1:i,])
-  visualize.progress(ensemble$fcms[[3]], data[1:i,])
-  par(old.par)
-  readline(prompt="Press [enter] to continue")
-}
-
-
-fcm <- NULL
-for (i in 1 : nrow(data)) {
-  fcm <- fcm.online.run(data[i,], 2, 2, centers = fcm$centers)
-  visualize.progress(fcm, data[1:i,])
-  readline(prompt="Press [enter] to continue")
-}
-
