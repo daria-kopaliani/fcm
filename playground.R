@@ -16,42 +16,19 @@ fcm <- fcm.batch.run(data, 4, 5)
 visualize.clusters(fcm, data)
 
 #####
-fcm1 <- fcm.online.run(data, 3)
+fcm1 <- fcm.init(3, 2, ncol(data), data[1:20,])
+fcm.online.run(fcm1, data)
 visualize.clusters(fcm1, data)
 
 #####
-fcm2_0 <- fcm.batch.run(data[1:20,], 3)
-fcm2 <- fcm.online.run(data, 3, centers = fcm2_0$centers)
+fcm2 <- fcm.init(4, 2, ncol(data), data[1:20,])
+fcm.online.run(fcm2, data)
 visualize.clusters(fcm2, data)
 
 #####
-fcm3_0 <- fcm.batch.run(data[1:20,], 4)
-fcm3 <- fcm.online.run(data, 4, centers = fcm3_0$centers, fuzzifier = 3)
-visualize.clusters(fcm3, data)
-
-
-fcm3 <- fcm.online.run(data, 4, centers = fcm3_0$centers, fuzzifier = 3)
-visualize.clusters(fcm3, data)
-
-visualize.lattice(fcm3)
-
-#####
-centers <- fcm.batch.run(data[1:20, ], 4)$centers
+fcm3 <- fcm.init(4, 2, ncol(data), data[1:20,])
 for (k in 1 : nrow(data)) {
-  fcm <- fcm.online.run(data[k, ], 4, centers = centers)
-  visualize.clusters(fcm, data[1:k, ])
-  centers <- fcm$centers
+  fcm3 <- fcm.online.run(fcm3, data[k,])
+  visualize.clusters(fcm3, data[1:k, ])
   readline(prompt="Press [enter] to continue")
 }
-
-
-####
-# simple
-
-m0 <- cbind(runif(5, 0, 5), runif(5, 0, 3))
-m1 <- cbind(runif(5, 10, 12), runif(5, 8, 11))
-matrix <- rbind(m0, m1)
-data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
-colnames(data) <- c("x", "y")
-data <- data[sample(nrow(data)),]
-plot(data$x, data$y)

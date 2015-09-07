@@ -57,49 +57,29 @@ fcm.membership.values <- function(data, centers, fuzzifier) {
   membership.values
 }
 
-fcm.init <- function(fuzzifier, n_clusters, initial_data = NULL) {
+fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL) {
 
   if (!is.null(initial_data)) {
-    
+    centers <- fcm.batch.run(initial_data, n_clusters, fuzzifier)$centers
+  } else {
+    centers <- matrix(runif(pattern_length * n_clusters, 0, 1), ncol = pattern_length, nrow = n_clusters)
   }
+  
+  list(centers = centers, fuzzifier = fuzzifier, PC = 0, membership.values = NULL)
 }
   
-fcm.online.run <- function(fcm, data, nclusters, fuzzifier = 2, centers = NULL) {
+fcm.online.run <- function(fcm, data) {
   
-  if (is.null(centers)) {
-    centers <- matrix(runif(ncol(data) * nclusters, 0, 1), ncol = ncol(data), nrow = nclusters)
-  } 
-  fcm <- list(centers = centers, fuzzifier = fuzzifier, membership.values = NULL, PC = 0)  
   for (i in 1 : nrow(data)) {
     sample <- as.matrix(data[i,])
     ss <- 0.6 * exp(-(i/nrow(data)))
-    u <- fcm.membership.values(sample, fcm$centers, fuzzifier)
-    for (j in 1 : nclusters)  {
-      fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ fuzzifier) * (sample - fcm$centers[j,])
+    u <- fcm.membership.values(sample, fcm$centers, fcm$fuzzifier)
+    for (j in 1 : nrow(fcm$centers))  {
+      fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ fcm$fuzzifier) * (sample - fcm$centers[j,])
     }
   }
-  fcm$membership.values <- fcm.membership.values(data, fcm$centers, fuzzifier)  
+  fcm$membership.values <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)  
   
-  fcm
-}
-
-
-fcm.online.run1 <- function(data, nclusters, fuzzifier = 2, centers = NULL) {
-  
-  if (is.null(centers)) {
-    centers <- matrix(runif(ncol(data) * nclusters, 0, 1), ncol = ncol(data), nrow = nclusters)
-  } 
-  fcm <- list(centers = centers, fuzzifier = fuzzifier, membership.values = NULL, PC = 0)  
-  for (i in 1 : nrow(data)) {
-    sample <- as.matrix(data[i,])
-    ss <- 0.6 * exp(-(i/nrow(data)))
-    u <- fcm.membership.values(sample, fcm$centers, fuzzifier)
-    for (j in 1 : nclusters)  {
-      fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ fuzzifier) * (sample - fcm$centers[j,])
-    }
-  }
-  fcm$membership.values <- fcm.membership.values(data, fcm$centers, fuzzifier)  
-
   fcm
 }
 
