@@ -43,3 +43,15 @@ for (k in 1 : nrow(data)) {
   centers <- fcm$centers
   readline(prompt="Press [enter] to continue")
 }
+
+
+####
+# simple
+
+m0 <- cbind(runif(5, 0, 5), runif(5, 0, 3))
+m1 <- cbind(runif(5, 10, 12), runif(5, 8, 11))
+matrix <- rbind(m0, m1)
+data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
+colnames(data) <- c("x", "y")
+data <- data[sample(nrow(data)),]
+plot(data$x, data$y)

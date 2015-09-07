@@ -27,7 +27,7 @@ visualize.lattice <- function(fcm, cell.side = 0.05, colors = NULL) {
       membership_value <- fcm.membership.values(sample, fcm$centers, fcm$fuzzifier)
       color <- numeric(3)
       for (j in 1 : nrow(fcm$centers)) {
-        color <- color + membership_value[j] * (col2rgb(colors[j]) / 255)
+        color <- color + membership_value[j] * (col2rgb(colors[j]) / 256)
       }
       rect(x, y, x + cell.side - 0.0001, y + cell.side - 0.0001, col = rgb(color[1], color[2], color[3]), border = "white")
     }
