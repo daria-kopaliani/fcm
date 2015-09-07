@@ -43,38 +43,3 @@ for (k in 1 : nrow(data)) {
   centers <- fcm$centers
   readline(prompt="Press [enter] to continue")
 }
-
-#####
-irisData <- iris[, 1:4]
-irisData <- apply(irisData, 2, function(x){(x-min(x))/(max(x)-min(x))})
-order <- sample(nrow(irisData))
-irisData <- irisData[order,]
-
-fcm4 <- fcm.batch.run(irisData, 3, 4)
-clusters <- fcm.cluster(fcm4, irisData)
-clustering.accuracy(clusters, iris[order, 5])
-
-fcm5 <- fcm.batch.run(irisData, 6, 2)
-clusters <- fcm.cluster(fcm5, irisData)
-clustering.accuracy(clusters, iris[order, 5])
-
-clustering.accuracy <- function(clusters, labels) {
-  
-  accuracy <- 0
-  
-  clusters_data <- factor(clusters)
-  for (cluster in levels(clusters_data)) {
-    cc <- labels[(clusters == cluster)]
-    max_occur <- 0
-    class <- levels(cc)[1]
-    for (label in levels(cc)) {
-      if (sum(cc == label) > max_occur) {
-        max_occur <- sum(cc == label)
-        class <- label
-      }
-    }
-    accuracy <- accuracy + (sum(cc == class) / length(cc)) / length(levels(clusters_data))
-  }
-  
-  accuracy
-}
