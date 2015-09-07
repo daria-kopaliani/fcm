@@ -50,13 +50,13 @@ irisData <- apply(irisData, 2, function(x){(x-min(x))/(max(x)-min(x))})
 order <- sample(nrow(irisData))
 irisData <- irisData[order,]
 
-fcm4 <- fcm.batch.run(irisData, 3, 5)
+fcm4 <- fcm.batch.run(irisData, 3, 4)
 clusters <- fcm.cluster(fcm4, irisData)
 clustering.accuracy(clusters, iris[order, 5])
 
-fcm5 <- fcm.batch.run(irisData, 4, 4)
+fcm5 <- fcm.batch.run(irisData, 6, 2)
 clusters <- fcm.cluster(fcm5, irisData)
-clustering.accuracy1(clusters, iris[order, 5])
+clustering.accuracy(clusters, iris[order, 5])
 
 clustering.accuracy <- function(clusters, labels) {
   
@@ -78,5 +78,3 @@ clustering.accuracy <- function(clusters, labels) {
   
   accuracy
 }
-
-
