@@ -28,9 +28,9 @@ order <- sample(nrow(irisData))
 irisData <- irisData[order,]
 
 n_clusters <- 6
-fuzzifier <- 4
-centers <- fcm.batch.run(irisData[1:20,], n_clusters, fuzzifier)$centers
-fcm <- fcm.online.run(irisData, n_clusters, fuzzifier = fuzzifier, centers = centers)
+fuzzifier <- 8
+fcm <- fcm.init(n_clusters, fuzzifier, ncol(irisData), irisData[1:20,])
+fcm <- fcm.online.run(fcm, irisData)
 clustering.accuracy(fcm.cluster(fcm, irisData), iris[order, 5])
 
 
