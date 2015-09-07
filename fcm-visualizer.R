@@ -41,7 +41,7 @@ visualize.lattice <- function(fcm, cell.side = 0.05, colors = NULL) {
 visualize.progress <- function(fcm, data, cell.side = 0.05) {
   
   colors <- topo.colors(nrow(fcm$centers))
-  title <- paste("PC:", fcm.PC(fcm), "Xie-Beni:", fcm.XB(fcm, data))
+  title <- paste("PC:", fcm$PC)
   plot(1, type = "n", xlim=c(0, 1), ylim=c(0, 1), main = title, yaxt="n", ylab="", xaxt="n", xlab="")
   for (x in seq(0, 1 - cell.side, cell.side)) {
     for (y in seq(0, 1 - cell.side, cell.side)) {      

@@ -57,9 +57,12 @@ fcm.membership.values <- function(data, centers, fuzzifier) {
   membership.values
 }
 
-fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL) {
+# only neccessary for online clustering
+fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL, inital_centers = NULL) {
 
-  if (!is.null(initial_data)) {
+  if (!is.null(inital_centers)) {
+    centers <- inital_centers
+  } else if (!is.null(initial_data)) {
     centers <- fcm.batch.run(initial_data, n_clusters, fuzzifier)$centers
   } else {
     centers <- matrix(runif(pattern_length * n_clusters, 0, 1), ncol = pattern_length, nrow = n_clusters)
