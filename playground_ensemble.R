@@ -11,9 +11,17 @@ colnames(data) <- c("x", "y")
 data <- data[sample(nrow(data)),]
 plot(data)
 
+ensemble <- fcm.ensemble.init(n_clusters = 3, pattern_length = ncol(data), initial_data = data[1:20,], n_fcm = 4)
+ensemble <- fcm.ensemble.online.run(ensemble, data)
+old.par <- par(mfrow=c(2, 2))
+visualize.progress(ensemble$fcms[[1]], data)
+visualize.progress(ensemble$fcms[[2]], data)
+visualize.progress(ensemble$fcms[[3]], data)
+visualize.progress(ensemble$fcms[[4]], data)
+par(old.par)
 
+# one step visualization
 ensemble <- fcm.ensemble.init(n_clusters = 3, pattern_length = ncol(data), initial_data = data[1:20,], n_fcm = 3)
-
 for (i in 1 : nrow(data)) {
   ensemble <- fcm.ensemble.online.run(ensemble, data[i,], k = i)
   old.par <- par(mfrow=c(1, 3))
@@ -23,3 +31,4 @@ for (i in 1 : nrow(data)) {
   par(old.par)
   readline(prompt="Press [enter] to continue")
 }
+

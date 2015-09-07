@@ -1,8 +1,8 @@
 source("fcm.R")
 
-fcm.ensemble.init <- function(n_clusters, pattern_length, initial_data, n_fcms = 3) {
+fcm.ensemble.init <- function(n_clusters, pattern_length, initial_data, n_fcms = 4) {
  
-  ensemble <- list("fcms" = list())
+  ensemble <- list("fcms" = list(), "best_fcm" = NULL)
   centers <- fcm.batch.run(initial_data, n_clusters, fuzzifier)$centers
   for (i in 1 : n_fcms) {
     ensemble$fcms[[i]] <- fcm.init(n_clusters, fuzzifier = 2 *i + 1, pattern_length, inital_centers = centers)
@@ -13,11 +13,16 @@ fcm.ensemble.init <- function(n_clusters, pattern_length, initial_data, n_fcms =
 
 fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
 
+  best_PC <- 0
   for (i in 1 : length(ensemble$fcms)) {
     fcm <- ensemble$fcms[[i]]
     fcm <- fcm.online.run(fcm, data)
     fcm$PC <- PC(fcm, data, i + k)
     ensemble$fcms[[i]] <- fcm
+    if (fcm$PC > best_PC) {
+      best_PC <- fcm$PC
+      ensemble$best_fcm <- fcm
+    }
   }
   
   ensemble
