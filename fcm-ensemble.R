@@ -24,6 +24,7 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
     
     sample <- data[i,]
     best_XB <- .Machine$integer.max
+    best_cascadePC <- 0
     for (cascade_index in 1 : length(ensemble$cascades)) {
       cascade <- ensemble$cascades[[cascade_index]]
       best_PC <- 0
@@ -31,13 +32,6 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
         fcm <- cascade$fcms[[fcm_index]]
         fcm <- fcm.online.run(fcm, sample)
         
-        # calculating Xie-Beni indicies for all neurons in a cascade 
-        # (just in case, we will only use for the neuron winner)
-        fcm$NXB <- NXB(fcm, sample, i + k)
-        fcm$XB <- fcm$NXB / DXB(fcm)
-        
-        # determining neuron-winner with the best Partition Coefficient
-        fcm$PC <- PC(fcm, sample, i + k)
         if (fcm$PC > best_PC) {
           best_PC <- fcm$PC
           cascade$best_fcm <- fcm
@@ -46,8 +40,9 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
       }
       
       #determining cascade with the Xie-Beni index (for the winner neuron)
-      if (cascade$best_fcm$XB < best_XB) {
-        best_XB <- cascade$best_fcm$XB
+      
+      if (cascade$best_fcm$PC > best_cascadePC) {
+        best_cascadePC <- cascade$best_fcm$PC
         ensemble$best_fcm <- cascade$best_fcm 
       }
       ensemble$cascades[[cascade_index]] <- cascade
@@ -57,16 +52,16 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
   ensemble
 }
 
-PC <- function(fcm, pattern, k) {
-  
-  membership_values <- fcm.membership.values(pattern, fcm$centers, fcm$fuzzifier)
-  t <- 0
-  for (i in 1 : nrow(fcm$centers)) {
-    t <- t + membership_values[i] ^ 2
-  }
-  
-  fcm$PC + ((1 + k)^(-1)) * (t - fcm$PC)
-}
+# PC <- function(fcm, pattern, k) {
+#   
+#   membership_values <- fcm.membership.values(pattern, fcm$centers, fcm$fuzzifier)
+#   t <- 0
+#   for (i in 1 : nrow(fcm$centers)) {
+#     t <- t + membership_values[i] ^ 2
+#   }
+#   
+#   fcm$PC + ((1 + k)^(-1)) * (t - fcm$PC)
+# }
 
 NXB <- function(fcm, pattern, k) {
   

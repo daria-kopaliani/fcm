@@ -12,15 +12,16 @@ fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL,
   list(centers = centers, fuzzifier = fuzzifier, PC = 0, XB = 1, NXB = 1)
 }
   
-fcm.online.run <- function(fcm, data) {
+fcm.online.run <- function(fcm, data, time_offset = 0) {
   
   for (i in 1 : nrow(data)) {
-    sample <- as.matrix(data[i,])
+    pattern <- as.matrix(data[i,])
     ss <- 0.6 * exp(-(i/nrow(data)))
-    u <- fcm.membership.values(sample, fcm$centers, fcm$fuzzifier)
+    u <- fcm.membership.values(pattern, fcm$centers, fcm$fuzzifier)
     for (j in 1 : nrow(fcm$centers))  {
-      fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ fcm$fuzzifier) * (sample - fcm$centers[j,])
+      fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ fcm$fuzzifier) * (pattern - fcm$centers[j,])
     }
+    fcm$PC <- fcm.online.PC(fcm, pattern, time_offset + i)
   }
   
   fcm
@@ -78,6 +79,17 @@ fcm.batch.PC <- function(fcm, data) {
   }
   
   PC / nrow(U)
+}
+
+fcm.online.PC <- function(fcm, pattern, k) {
+  
+  U <- fcm.membership.values(pattern, fcm$centers, fcm$fuzzifier)
+  t <- 0
+  for (i in 1 : nrow(fcm$centers)) {
+    t <- t + U[i] ^ 2
+  }
+  
+  fcm$PC + (t - fcm$PC) / (k + 1)
 }
 
 fcm.batch.XB <- function(fcm, data) {

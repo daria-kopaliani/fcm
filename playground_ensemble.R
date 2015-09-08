@@ -2,24 +2,23 @@ source("fcm-ensemble.R")
 source("fcm-visualizer.R")
 
 
+#fuzzy data
 m0 <- cbind(runif(15, 0, 5), runif(15, 0, 5))
 m1 <- cbind(runif(15, 8, 12), runif(15, 8, 11))
 m2 <- cbind(runif(30, 4, 9), runif(30, 4, 9))
-matrix <- rbind(m0, m1, m2)
-data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
-colnames(data) <- c("x", "y")
-data <- data[sample(nrow(data)),]
-plot(data)
+fuzzy_data <- data.frame(rbind(m0, m1, m2)(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
+colnames(fuzzy_data) <- c("x", "y")
+fuzzy_data <- fuzzy_data[sample(nrow(data)),]
+plot(fuzzy_data)
 
 #simple data
 m0 <- cbind(runif(20, 0, 5), runif(20, 0, 3))
 m1 <- cbind(runif(20, 10, 12), runif(20, 8, 11))
 m2 <- cbind(runif(20, 6, 8), runif(20, 6, 8))
-matrix <- rbind(m0, m1, m2)
-data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
-colnames(data) <- c("x", "y")
-data <- data[sample(nrow(data)),]
-plot(data)
+crisp_data <- data.frame(apply(rbind(m0, m1, m2), 2, function(x){(x-min(x))/(max(x)-min(x))}))
+colnames(crisp_data) <- c("x", "y")
+crisp_data <- crisp_data[sample(nrow(crisp_data)),]
+plot(crisp_data)
 
 
 
