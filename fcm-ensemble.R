@@ -7,7 +7,7 @@ fcm.ensemble.init <- function(pattern_length, initial_data, n_fcms = 2, n_cascad
     cascade <- list(fcms = list(), best_fcm = NULL)
     centers <- fcm.batch.run(initial_data, 1 + j, 2)$centers
     for (i in 1 : n_fcms) {
-      cascade$fcms[[i]] <- fcm.init(n_clusters = 1 + j, fuzzifier = 2 *i + 1, pattern_length, inital_centers = centers)
+      cascade$fcms[[i]] <- fcm.init(n_clusters = 1 + j, fuzzifier = i + 1, pattern_length, inital_centers = centers)
     }
     ensemble$cascades[[j]] <- cascade  
   }

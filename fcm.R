@@ -3,24 +3,25 @@ vector.norm <- function(x) {
   sqrt(sum(x^2))
 }
 
-fcm.PC <- function(fcm) {
+fcm.PC <- function(fcm, data) {
   
   PC <- 0
-  for (i in 1 : nrow(fcm$membership.values)) {
-    for (j in 1 : ncol(fcm$membership.values)) {
-      PC <- PC + fcm$membership.values[i, j]^2
+  U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
+  for (i in 1 : nrow(U)) {
+    for (j in 1 : ncol(U)) {
+      PC <- PC + U[i, j]^2
     }
   }
   
-  PC / nrow(fcm$membership.values)
+  PC / nrow(U)
 }
 
 fcm.XB <- function(fcm, data) {
   
   NXB <- 0 
   U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
-  for (i in 1 : nrow(data)) {
-    for (j in 1 : ncol(fcm$membership.values)) {
+  for (i in 1 : nrow(U)) {
+    for (j in 1 : ncol(U)) {
       NXB <- NXB + U[i, j]^(fcm$fuzzifier) * vector.norm(data[i,] - fcm$centers[j,])
     }
   }
@@ -41,21 +42,28 @@ fcm.XB <- function(fcm, data) {
   NXB/DXB
 }
 
-fcm.membership.values <- function(data, centers, fuzzifier) {
+fcm.membership.values <- function(sample, centers, fuzzifier) {
   
-  sample <- as.matrix(data)
-  membership.values <- matrix(0, nrow = nrow(sample), ncol = nrow(centers))
+  sample <- as.matrix(sample)
+  U <- matrix(0, nrow = nrow(sample), ncol = nrow(centers))
   for (i in 1 : nrow(sample)) {
     for (j in 1 : nrow(centers)) {
-      membership.values[i, j] <- vector.norm(sample[i,] - centers[j,])^(2 / (1 - fuzzifier))
+      norm <- vector.norm(sample[i,] - centers[j,])
+      if (norm != 0) {
+        U[i, j] <- norm^(2 / (1 - fuzzifier))
+      }
       z <- 0
       for (k in 1 : nrow(centers)) {
-        z <- z + vector.norm(sample[i,] - centers[k,])^(2 / (1 - fuzzifier))
+        norm <- vector.norm(sample[i,] - centers[k,])
+        if (norm != 0) {
+          z <- z + norm^(2 / (1 - fuzzifier))  
+        }
       }
-      membership.values[i, j] <- membership.values[i, j] / z
+      
+      U[i, j] <- U[i, j] / z
     }
   }
-  membership.values
+  U
 }
 
 # only neccessary for online clustering
@@ -69,7 +77,7 @@ fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL,
     centers <- matrix(runif(pattern_length * n_clusters, 0, 1), ncol = pattern_length, nrow = n_clusters)
   }
   
-  list(centers = centers, fuzzifier = fuzzifier, PC = 1, XB = 1, NXB = 1, membership.values = NULL)
+  list(centers = centers, fuzzifier = fuzzifier, PC = 0, XB = 1, NXB = 1)
 }
   
 fcm.online.run <- function(fcm, data) {
@@ -82,26 +90,30 @@ fcm.online.run <- function(fcm, data) {
       fcm$centers[j,] <- fcm$centers[j,] + ss * (u[1, j] ^ fcm$fuzzifier) * (sample - fcm$centers[j,])
     }
   }
-  fcm$membership.values <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)  
+  
   fcm
 }
 
 fcm.batch.run <- function(data, nclusters, fuzzifier = 2, e = 0.01, max.epoch = 100) {
   
   centers <- matrix(runif(ncol(data) * nclusters, 0, 1), ncol = ncol(data), nrow = nclusters)
-  membership.values <- matrix(0, nrow = nrow(data), ncol = nclusters)
+  U <- matrix(0, nrow = nrow(data), ncol = nclusters)
   for (k in 1 : max.epoch) {
-    prev.membership.values <- membership.values
-    membership.values <- fcm.membership.values(data, centers, fuzzifier)    
-    for (j in 1 : nclusters) {
-      centers[j,] <- apply((membership.values[,j] ^ fuzzifier) * data, 2, sum) / sum(membership.values[,j] ^ fuzzifier)
+    if (k %% 10 == 0) {
+      print(paste("epoch:", k))  
     }
-    if (max(abs(prev.membership.values - membership.values)) < e)  {
+    
+    prev.U <- U
+    U <- fcm.membership.values(data, centers, fuzzifier)    
+    for (j in 1 : nclusters) {
+      centers[j,] <- apply((U[,j] ^ fuzzifier) * data, 2, sum) / sum(U[,j] ^ fuzzifier)
+    }
+    if (max(abs(U - prev.U)) < e)  {
       break
     }
   }
   
-  list(centers = centers, fuzzifier = fuzzifier, membership.values = membership.values)
+  list(centers = centers, fuzzifier = fuzzifier)
 }
 
 fcm.cluster <- function(fcm, sample) {
