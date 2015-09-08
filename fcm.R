@@ -18,16 +18,17 @@ fcm.PC <- function(fcm) {
 fcm.XB <- function(fcm, data) {
   
   NXB <- 0 
+  U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
   for (i in 1 : nrow(data)) {
     for (j in 1 : ncol(fcm$membership.values)) {
-      NXB <- fcm$U[i, j]^(fcm$fuzzifier) * vector.norm(data[i,] - fcm$centers[j,])
+      NXB <- NXB + U[i, j]^(fcm$fuzzifier) * vector.norm(data[i,] - fcm$centers[j,])
     }
   }
   NXB <- NXB / nrow(data)
   
   DXB <- .Machine$integer.max
   for (i in 1 : nrow(fcm$centers)) {
-    for (i in 1 : nrow(fcm$centers)) {
+    for (j in 1 : nrow(fcm$centers)) {
       if (i != j) {
         dist <- vector.norm(fcm$centers[i,] - fcm$centers[j])
         if (dist < DXB) {
@@ -68,7 +69,7 @@ fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL,
     centers <- matrix(runif(pattern_length * n_clusters, 0, 1), ncol = pattern_length, nrow = n_clusters)
   }
   
-  list(centers = centers, fuzzifier = fuzzifier, PC = 1, XB = 1, NEXB = 1, membership.values = NULL)
+  list(centers = centers, fuzzifier = fuzzifier, PC = 1, XB = 1, NXB = 1, membership.values = NULL)
 }
   
 fcm.online.run <- function(fcm, data) {
