@@ -2,10 +2,10 @@ source("fcm.R")
 
 fcm.ensemble.init <- function(pattern_length, initial_data, n_fcms = 2, n_cascades = 2) {
  
-  ensemble <- list("cascades" = list(), "best_fcm" = NULL)
+  ensemble <- list(cascades = list(), best_fcm = NULL)
   for (j in 1 : n_cascades) {
-    cascade <- list("fcms" = list(), "best_fcm" = NULL)
-    centers <- fcm.batch.run(initial_data, 1 + j, fuzzifier)$centers
+    cascade <- list(fcms = list(), best_fcm = NULL)
+    centers <- fcm.batch.run(initial_data, 1 + j, 2)$centers
     for (i in 1 : n_fcms) {
       cascade$fcms[[i]] <- fcm.init(n_clusters = 1 + j, fuzzifier = 2 *i + 1, pattern_length, inital_centers = centers)
     }
@@ -18,29 +18,37 @@ fcm.ensemble.init <- function(pattern_length, initial_data, n_fcms = 2, n_cascad
 fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
   
   for (i in 1 : nrow(data)) {
+    if (i %% 10 == 0) {
+      print(i)  
+    }
+    
     sample <- data[i,]
+    best_XB <- .Machine$integer.max
     for (cascade_index in 1 : length(ensemble$cascades)) {
       cascade <- ensemble$cascades[[cascade_index]]
       best_PC <- 0
-      best_XB <- .Machine$integer.max
       for (fcm_index in 1 : length(cascade$fcms)) {
         fcm <- cascade$fcms[[fcm_index]]
         fcm <- fcm.online.run(fcm, sample)
-        fcm$PC <- PC(fcm, sample, i + k)
-      
-      
+        
+        # calculating Xie-Beni indicies for all neurons in a cascade 
+        # (just in case, we will only use for the neuron winner)
         fcm$NXB <- NXB(fcm, sample, i + k)
         fcm$XB <- fcm$NXB / DXB(fcm)
-        if (fcm$XB < best_XB) {
-          best_XB <- fcm$XB
-        }
-        print(paste("XB:", fcm$XB))
         
-        cascade$fcms[[fcm_index]] <- fcm
+        # determining neuron-winner with the best Partition Coefficient
+        fcm$PC <- PC(fcm, sample, i + k)
         if (fcm$PC > best_PC) {
           best_PC <- fcm$PC
           cascade$best_fcm <- fcm
         }
+        cascade$fcms[[fcm_index]] <- fcm
+      }
+      
+      #determining cascade with the Xie-Beni index (for the winner neuron)
+      if (cascade$best_fcm$XB < best_XB) {
+        best_XB <- cascade$best_fcm$XB
+        ensemble$best_fcm <- cascade$best_fcm 
       }
       ensemble$cascades[[cascade_index]] <- cascade
     } 
