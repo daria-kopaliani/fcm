@@ -11,16 +11,15 @@ colnames(data) <- c("x", "y")
 data <- data[sample(nrow(data)),]
 plot(data)
 
-# #simple data
-# m0 <- cbind(runif(120, 0, 5), runif(120, 0, 3))
-# m1 <- cbind(runif(120, 10, 12), runif(120, 8, 11))
-# # m0 <- cbind(runif(45, 0, 12), runif(45, 0, 11))
-# # m1 <- cbind(runif(45, 0, 12), runif(45, 0, 11))
-# matrix <- rbind(m0, m1)
-# data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
-# colnames(data) <- c("x", "y")
-# data <- data[sample(nrow(data)),]
-# plot(data)
+#simple data
+m0 <- cbind(runif(20, 0, 5), runif(20, 0, 3))
+m1 <- cbind(runif(20, 10, 12), runif(20, 8, 11))
+m2 <- cbind(runif(20, 6, 8), runif(20, 6, 8))
+matrix <- rbind(m0, m1, m2)
+data <- data.frame(apply(matrix, 2, function(x){(x-min(x))/(max(x)-min(x))}))
+colnames(data) <- c("x", "y")
+data <- data[sample(nrow(data)),]
+plot(data)
 
 
 
@@ -57,17 +56,19 @@ fcm4 <- fcm.online.run(fcm.init(3, 2, 2, data[1:20,]), data)
 visualize.progress(fcm4, data)
 fcm.PC(fcm4, data)
 
-test <- function(n) {
-  start.time <- Sys.time()
-  
-  fcm <- fcm.init(n, 2, 2, data[1:20,])
+test.batch <- function(n, f = 2) {
+  fcm <- fcm.batch.run(data, n, f)
+  visualize.progress(fcm, data)
+  print(paste("PC:", fcm.PC(fcm, data)))
+  print(paste("Xie-Beni:", fcm.XB(fcm, data)))
+}
+
+test.online <- function(n, f = 2) {
+  fcm <- fcm.init(n, f, 2, data[1:20,])
   fcm <- fcm.online.run(fcm, data)
   visualize.progress(fcm, data)
   print(paste("PC:", fcm.PC(fcm, data)))
   print(paste("Xie-Beni:", fcm.XB(fcm, data)))
-  
-  end.time <- Sys.time()
-  print(end.time - start.time)
 }
 
 

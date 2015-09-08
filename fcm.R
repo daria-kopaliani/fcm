@@ -1,71 +1,3 @@
-vector.norm <- function(x) {
-  
-  sqrt(sum(x^2))
-}
-
-fcm.PC <- function(fcm, data) {
-  
-  PC <- 0
-  U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
-  for (i in 1 : nrow(U)) {
-    for (j in 1 : ncol(U)) {
-      PC <- PC + U[i, j]^2
-    }
-  }
-  
-  PC / nrow(U)
-}
-
-fcm.XB <- function(fcm, data) {
-  
-  NXB <- 0 
-  U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
-  for (i in 1 : nrow(U)) {
-    for (j in 1 : ncol(U)) {
-      NXB <- NXB + U[i, j]^(fcm$fuzzifier) * vector.norm(data[i,] - fcm$centers[j,])
-    }
-  }
-  NXB <- NXB / nrow(data)
-  
-  DXB <- .Machine$integer.max
-  for (i in 1 : nrow(fcm$centers)) {
-    for (j in 1 : nrow(fcm$centers)) {
-      if (i != j) {
-        dist <- vector.norm(fcm$centers[i,] - fcm$centers[j])
-        if (dist < DXB) {
-          DXB <- dist
-        }
-      }
-    }
-  }
-  
-  NXB/DXB
-}
-
-fcm.membership.values <- function(sample, centers, fuzzifier) {
-  
-  sample <- as.matrix(sample)
-  U <- matrix(0, nrow = nrow(sample), ncol = nrow(centers))
-  for (i in 1 : nrow(sample)) {
-    for (j in 1 : nrow(centers)) {
-      norm <- vector.norm(sample[i,] - centers[j,])
-      if (norm != 0) {
-        U[i, j] <- norm^(2 / (1 - fuzzifier))
-      }
-      z <- 0
-      for (k in 1 : nrow(centers)) {
-        norm <- vector.norm(sample[i,] - centers[k,])
-        if (norm != 0) {
-          z <- z + norm^(2 / (1 - fuzzifier))  
-        }
-      }
-      
-      U[i, j] <- U[i, j] / z
-    }
-  }
-  U
-}
-
 # only neccessary for online clustering
 fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL, inital_centers = NULL) {
 
@@ -113,9 +45,13 @@ fcm.batch.run <- function(data, nclusters, fuzzifier = 2, e = 0.01, max.epoch = 
     }
   }
   
-  list(centers = centers, fuzzifier = fuzzifier)
+  list(centers = centers, fuzzifier = fuzzifier, PC = fcm.batch.PC(fcm, data), XB = fcm.batch.XB(fcm, data))
 }
 
+##############################################################################################################
+##############################################################################################################
+##############################################################################################################
+##############################################################################################################
 fcm.cluster <- function(fcm, sample) {
   
   data <- as.matrix(sample)
@@ -124,4 +60,72 @@ fcm.cluster <- function(fcm, sample) {
   } 
   membership.values <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier) 
   as.matrix(apply(membership.values, 1, which.max))
+}
+
+vector.norm <- function(x) {
+  
+  sqrt(sum(x^2))
+}
+
+fcm.batch.PC <- function(fcm, data) {
+  
+  PC <- 0
+  U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
+  for (i in 1 : nrow(U)) {
+    for (j in 1 : ncol(U)) {
+      PC <- PC + U[i, j]^2
+    }
+  }
+  
+  PC / nrow(U)
+}
+
+fcm.batch.XB <- function(fcm, data) {
+  
+  NXB <- 0 
+  U <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)
+  for (i in 1 : nrow(U)) {
+    for (j in 1 : ncol(U)) {
+      NXB <- NXB + U[i, j]^(fcm$fuzzifier) * vector.norm(data[i,] - fcm$centers[j,])
+    }
+  }
+  NXB <- NXB / nrow(data)
+  
+  DXB <- .Machine$integer.max
+  for (i in 1 : nrow(fcm$centers)) {
+    for (j in 1 : nrow(fcm$centers)) {
+      if (i != j) {
+        dist <- vector.norm(fcm$centers[i,] - fcm$centers[j])
+        if (dist < DXB) {
+          DXB <- dist
+        }
+      }
+    }
+  }
+  
+  NXB/DXB
+}
+
+fcm.membership.values <- function(sample, centers, fuzzifier) {
+  
+  sample <- as.matrix(sample)
+  U <- matrix(0, nrow = nrow(sample), ncol = nrow(centers))
+  for (i in 1 : nrow(sample)) {
+    for (j in 1 : nrow(centers)) {
+      norm <- vector.norm(sample[i,] - centers[j,])
+      if (norm != 0) {
+        U[i, j] <- norm^(2 / (1 - fuzzifier))
+      }
+      z <- 0
+      for (k in 1 : nrow(centers)) {
+        norm <- vector.norm(sample[i,] - centers[k,])
+        if (norm != 0) {
+          z <- z + norm^(2 / (1 - fuzzifier))  
+        }
+      }
+      
+      U[i, j] <- U[i, j] / z
+    }
+  }
+  U
 }
