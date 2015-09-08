@@ -23,19 +23,24 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
     }
     
     sample <- data[i,]
-    best_XB <- .Machine$integer.max
+    best_cascadeXB <- .Machine$integer.max
     best_cascadePC <- 0
     for (cascade_index in 1 : length(ensemble$cascades)) {
       cascade <- ensemble$cascades[[cascade_index]]
       best_PC <- 0
+      best_XB <- .Machine$integer.max
       for (fcm_index in 1 : length(cascade$fcms)) {
         fcm <- cascade$fcms[[fcm_index]]
         fcm <- fcm.online.run(fcm, sample)
         
         if (fcm$PC > best_PC) {
           best_PC <- fcm$PC
-          cascade$best_fcm <- fcm
+#           cascade$best_fcm <- fcm
         }
+        if (fcm$XB < best_XB) {
+          best_XB <- fcm$XB
+          cascade$best_fcm <- fcm
+        } 
         cascade$fcms[[fcm_index]] <- fcm
       }
       
@@ -43,8 +48,14 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
       
       if (cascade$best_fcm$PC > best_cascadePC) {
         best_cascadePC <- cascade$best_fcm$PC
+#         ensemble$best_fcm <- cascade$best_fcm 
+      }
+      if (cascade$best_fcm$XB < best_cascadeXB) {
+        best_cascadeXB <- cascade$best_fcm$XB
         ensemble$best_fcm <- cascade$best_fcm 
       }
+
+
       ensemble$cascades[[cascade_index]] <- cascade
     } 
   }
