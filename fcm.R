@@ -68,7 +68,7 @@ fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL,
     centers <- matrix(runif(pattern_length * n_clusters, 0, 1), ncol = pattern_length, nrow = n_clusters)
   }
   
-  list(centers = centers, fuzzifier = fuzzifier, PC = 0, membership.values = NULL)
+  list(centers = centers, fuzzifier = fuzzifier, PC = 1, XB = 1, NEXB = 1, membership.values = NULL)
 }
   
 fcm.online.run <- function(fcm, data) {
@@ -82,7 +82,6 @@ fcm.online.run <- function(fcm, data) {
     }
   }
   fcm$membership.values <- fcm.membership.values(data, fcm$centers, fcm$fuzzifier)  
-  
   fcm
 }
 
