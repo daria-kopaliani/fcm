@@ -54,16 +54,18 @@ print(paste("batch XB", fcm.batch.XB(ensemble$cascades[[2]]$fcms[[1]], data)))
 test.batch <- function(n, f = 2) {
   fcm <- fcm.batch.run(data, n, f)
   visualize.progress(fcm, data)
-  print(paste("PC:", fcm.PC(fcm, data)))
-  print(paste("Xie-Beni:", fcm.XB(fcm, data)))
+  print(paste("PC:", fcm.batch.PC(fcm, data)))
+  print(paste("Xie-Beni:", fcm.batch.XB(fcm, data)))
 }
 
 test.online <- function(n, f = 2) {
   fcm <- fcm.init(n, f, 2, data[1:20,])
   fcm <- fcm.online.run(fcm, data)
   visualize.progress(fcm, data)
-  print(paste("PC:", fcm.PC(fcm, data)))
-  print(paste("Xie-Beni:", fcm.XB(fcm, data)))
+  print(paste("online PC:", fcm$PC))
+  print(paste("batch PC:", fcm.batch.PC(fcm, data)))
+  print(paste("online Xie-Beni:", fcm$XB))
+  print(paste("batch Xie-Beni:", fcm.batch.XB(fcm, data)))
 }
 
 

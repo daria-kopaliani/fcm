@@ -14,6 +14,9 @@ fcm.init <- function(n_clusters, fuzzifier, pattern_length, initial_data = NULL,
   
 fcm.online.run <- function(fcm, data, time_offset = 0) {
   
+  if (class(data) == "numeric") {
+   data <- t(as.matrix(data)) 
+  }
   for (i in 1 : nrow(data)) {
     pattern <- as.matrix(data[i,])
     ss <- 0.6 * exp(-(i/nrow(data)))
@@ -34,9 +37,9 @@ fcm.batch.run <- function(data, n_clusters, fuzzifier = 2, e = 0.01, max.epoch =
   centers <- matrix(runif(ncol(data) * n_clusters, 0, 1), ncol = ncol(data), nrow = n_clusters)
   U <- matrix(0, nrow = nrow(data), ncol = n_clusters)
   for (epoch in 1 : max.epoch) {
-    if (epoch %% 10 == 0) {
-      print(paste("epoch:", epoch))  
-    }
+#     if (epoch %% 10 == 0) {
+#       print(paste("epoch:", epoch))  
+#     }
     
     prev.U <- U
     U <- fcm.membership.values(data, centers, fuzzifier)    

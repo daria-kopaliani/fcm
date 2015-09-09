@@ -35,11 +35,11 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
         
         if (fcm$PC > best_PC) {
           best_PC <- fcm$PC
-#           cascade$best_fcm <- fcm
+          cascade$best_fcm <- fcm
         }
         if (fcm$XB < best_XB) {
           best_XB <- fcm$XB
-          cascade$best_fcm <- fcm
+#           cascade$best_fcm <- fcm
         } 
         cascade$fcms[[fcm_index]] <- fcm
       }
@@ -48,11 +48,11 @@ fcm.ensemble.online.run <- function(ensemble, data, k = 0) {
       
       if (cascade$best_fcm$PC > best_cascadePC) {
         best_cascadePC <- cascade$best_fcm$PC
-#         ensemble$best_fcm <- cascade$best_fcm 
+        ensemble$best_fcm <- cascade$best_fcm 
       }
       if (cascade$best_fcm$XB < best_cascadeXB) {
         best_cascadeXB <- cascade$best_fcm$XB
-        ensemble$best_fcm <- cascade$best_fcm 
+#         ensemble$best_fcm <- cascade$best_fcm 
       }
 
 
